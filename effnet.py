@@ -1,8 +1,7 @@
 import numpy as np
-import pandas as pd
 import tensorflow as tf
 
-from efficientnet import EfficientNetB4
+from efficientnet.keras import EfficientNetB4
 from tensorflow.keras.layers import concatenate, Conv2D, Conv2DTranspose, Dropout, LeakyReLU, MaxPooling2D
 
 from blocks import residual_block
@@ -14,7 +13,7 @@ print("Initializing")
 
 def efficientUnet():
 
-    input_shape = 123456  # ------------------------<
+    input_shape = (512, 512, 1)  # ------------------------<
     neurons = 8
     d = 0.1  # dropout
 
@@ -62,6 +61,5 @@ def efficientUnet():
 
     model = tf.keras.Model(inputs=[inputs], outputs=[output])
     model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
-    model.summary()
 
     return model
