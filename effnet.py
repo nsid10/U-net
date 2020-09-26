@@ -51,7 +51,7 @@ def efficientUnet(input_shape, neurons=8, droprate=0.1):
 
     out = Conv2D(1, (1, 1), activation="sigmoid")(u4)
 
-    model = tf.keras.Model(inputs=[inputs], outputs=[output])
+    model = tf.keras.Model(inputs=[inputs], outputs=[out])
     model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
 
     return model
