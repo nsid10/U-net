@@ -4,7 +4,7 @@ import numpy as np
 import skimage.io as io
 import tensorflow as tf
 
-from effnet import *
+from unets import *
 
 np.random.seed = 42
 
