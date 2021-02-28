@@ -1,14 +1,56 @@
-from tensorflow.keras.layers import Add, BatchNormalization, Conv2D, LeakyReLU
+import tensorflow as tf
+
+from tensorflow.keras.layers import Activation, Add, BatchNormalization, Concatenate, Conv2D, Conv2DTranspose
+from tensorflow.keras.layers import Dropout, LeakyReLU, MaxPooling2D
 
 
-def residual_block(x, filters):
+def Conv_block(x, filters, a=0.01, dr=0.05):
     y = Conv2D(filters, (3, 3), strides=(1, 1), padding="same")(x)
-    y = LeakyReLU(alpha=0.1)(y)
-    y = BatchNormalization()(y)
+    y = BatchNormalization(axis=-1)(y)
+    y = LeakyReLU(alpha=a)(y)
+    y = Dropout(rate=dr)(y)
 
-    y = Conv2D(filters, (3, 3), strides=(1, 1), padding="same")(y)
-    y = LeakyReLU(alpha=0.1)(y)
-    y = BatchNormalization()(y)
+    return y
 
-    out = Add()([x, y])
-    return out
+
+def Residual_block(x, filters, a=0.01, dr=0.05):
+    y = Conv_block(x, filters, a, dr)
+    y = Conv_block(y, filters, a, dr)
+    y = Add(axis=-1)([x, y])
+
+    return y
+
+
+def Dense_block(x, filters, a=0.01, dr=0.05, depth=2):
+
+    for _ in range(depth):
+        xn = Conv_block(x, filters, a, dr)
+        x = Concatenate(axis=-1)([x, xn])
+
+    return x
+
+
+def R2_block_old(x, filters, a=0.01, dr=0.05, depth=3):
+    x1 = Conv_block(x, filters, a, dr)
+
+    xn = Conv_block(x1, filters, a, dr)
+    cn = Add(axis=-1)([x1, xn])
+
+    for _ in range(depth - 1):
+        xn = Conv_block(cn, filters, a, dr)
+        cn = Add(axis=-1)([x1, xn])
+
+    return cn
+
+
+def R2_block(x, filters, a=0.01, dr=0.05, depth=3):
+    x1 = Conv_block(x, filters, a, dr)
+
+    xn = Conv_block(x1, filters, a, dr)
+    cn = Concatenate(axis=-1)([x1, xn])
+
+    for _ in range(depth - 1):
+        xn = Conv_block(cn, filters, a, dr)
+        cn = Concatenate(axis=-1)([x1, xn])
+
+    return cn
