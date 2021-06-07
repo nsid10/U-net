@@ -5,9 +5,9 @@ from tensorflow.keras.layers import Dropout, LeakyReLU, MaxPooling2D
 
 
 def Conv_block(x, filters, a=0.01, dr=0.05, k=3, s=1):
-    y = Conv2D(filters, (k, k), strides=(s, s), padding="same")(x)
-    y = BatchNormalization(axis=-1)(y)
-    y = LeakyReLU(alpha=a)(y)
+    x = Conv2D(filters, (k, k), strides=(s, s), padding="same")(x)
+    x = LeakyReLU(alpha=a)(x)
+    x = BatchNormalization(axis=-1)(x)
     y = Dropout(rate=dr)(y)
 
     return y
