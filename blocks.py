@@ -8,9 +8,9 @@ def Conv_block(x, filters, a=0.01, dr=0.05, k=3, s=1):
     x = Conv2D(filters, (k, k), strides=(s, s), padding="same")(x)
     x = BatchNormalization(axis=-1)(x)
     x = LeakyReLU(alpha=a)(x)
-    y = Dropout(rate=dr)(y)
+    x = Dropout(rate=dr)(x)
 
-    return y
+    return x
 
 
 def Residual_block(x, filters, a=0.01, dr=0.05):
