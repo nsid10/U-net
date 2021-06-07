@@ -4,8 +4,8 @@ from tensorflow.keras.layers import Activation, Add, BatchNormalization, Concate
 from tensorflow.keras.layers import Dropout, LeakyReLU, MaxPooling2D
 
 
-def Conv_block(x, filters, a=0.01, dr=0.05):
-    y = Conv2D(filters, (3, 3), strides=(1, 1), padding="same")(x)
+def Conv_block(x, filters, a=0.01, dr=0.05, k=3, s=1):
+    y = Conv2D(filters, (k, k), strides=(s, s), padding="same")(x)
     y = BatchNormalization(axis=-1)(y)
     y = LeakyReLU(alpha=a)(y)
     y = Dropout(rate=dr)(y)
