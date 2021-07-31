@@ -66,32 +66,6 @@ def Dense_block(x, filters: int, a=0.01, dr=0.05, depth=2):
     return x
 
 
-def R2_block(x, filters: int, a=0.01, dr=0.05, depth=3):
-    """
-    Recurrent residual block
-
-    Args:
-        x: Input tensor
-        filters (int): No. of filters in convolution layer
-        a (float, optional): Leakage rate for ReLU. Defaults to 0.01.
-        dr (float, optional): Dropout rate. Defaults to 0.05.
-        depth (int, optional): Depth of R2 block. Defaults to 2.
-
-    Returns:
-        Output tensor
-    """
-    x1 = Conv_block(x, filters, a, dr)
-
-    xn = Conv_block(x1, filters, a, dr)
-    cn = Concatenate(axis=-1)([x1, xn])
-
-    for _ in range(depth - 1):
-        xn = Conv_block(cn, filters, a, dr)
-        cn = Concatenate(axis=-1)([x1, xn])
-
-    return cn
-
-
 def Fractal(x, filters: int, order: int, a=0.01, dr=0.05, join=True):
     """
     Generates a fractal connection block
