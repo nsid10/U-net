@@ -1,10 +1,9 @@
 import tensorflow as tf
-
-from blocks import Conv_block
-
 from tensorflow.keras.applications import EfficientNetB7
 from tensorflow.keras.layers import Concatenate, Conv2D, Conv2DTranspose, Input, MaxPool2D
 from tensorflow.keras.optimizers import Adam
+
+from blocks import Conv_block
 
 
 def unet_block(x, filters: int):
