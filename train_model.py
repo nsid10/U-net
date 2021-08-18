@@ -53,5 +53,5 @@ lr_shceduler = LearningRateScheduler(scheduler, verbose=1)
 # training model
 model = efficientB7_unet_builder(input_shape)
 print(model.summary())
-# K.set_value(model.optimizer.learning_rate, 0.003)
+
 model.fit(x=x_train, y=y_train, batch_size=16, epochs=500, verbose=2, callbacks=[early_stop, checkpoint, reduce_lr, lr_shceduler])
