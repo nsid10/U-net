@@ -4,11 +4,11 @@ import numpy as np
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, roc_auc_score
 
 
-main_path = "./"
+main_path = ""
 
 
 # loading test data
-testing_labels = f"{main_path}/Data/patches/labels/test/"
+testing_labels = f"{main_path}/labels/test/"
 test_lbl = next(os.walk(testing_labels))[2]
 test_lbl.sort()
 y_true = np.concatenate([np.load(testing_labels + file_id)["arr_0"] for file_id in test_lbl], axis=0)
@@ -17,7 +17,7 @@ y_true = y_true.flatten()
 
 
 # loading predictions
-y_pred = np.load(f"{main_path}/Data/predictions/preds.npz")["arr_0"]
+y_pred = np.load(f"{main_path}/predictions/preds.npz")["arr_0"]
 y_pred = y_pred.flatten()
 
 
@@ -25,11 +25,9 @@ def dice_coef(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     Calculates the Sørensen–Dice coefficient
     """
-    smooth = 0
     y_true_f = y_true.flatten()
     y_pred_f = y_pred.flatten()
-    intersection = np.sum(y_true_f * y_pred_f)
-    return (2.0 * intersection + smooth) / (np.sum(y_true_f) + np.sum(y_pred_f) + smooth)
+    return (2.0 * np.sum(y_true_f * y_pred_f)) / (np.sum(y_true_f) + np.sum(y_pred_f))
 
 
 def image_metrics(y_true: np.ndarray, y_pred: np.ndarray, lim=0.5) -> tuple(float):
@@ -61,7 +59,3 @@ auc, f1, acc, sen, spe = image_metrics(y_true, y_pred, lim=0.5)
 
 
 print(f"Accuracy = \t{acc}\nf1score\t = \t{f1}\nAUC\t = \t{auc}\nDice\t = \t{dice}\nSensitivity = \t{sen}\nSpecificity = \t{spe}")
-
-
-with open(f"{main_path}/Data/results.txt", "w") as ff:
-    ff.write(f"Accuracy = \t{acc}\nf1score\t = \t{f1}\nAUC\t = \t{auc}\nDice\t = \t{dice}\nSensitivity = \t{sen}\nSpecificity = \t{spe}")

@@ -11,12 +11,12 @@ np.random.seed = seed
 tf.random.set_seed(seed)
 
 
-main_path = "./"
+main_path = ""
 
 
 # loading data
-training_images = f"{main_path}/Data/images/train/"
-training_labels = f"{main_path}/Data/labels/train/"
+training_images = f"{main_path}/images/train/"
+training_labels = f"{main_path}/labels/train/"
 
 train_img = next(os.walk(training_images))[2]
 train_lbs = next(os.walk(training_labels))[2]
@@ -52,6 +52,6 @@ lr_shceduler = LearningRateScheduler(scheduler, verbose=1)
 
 # training model
 model = efficientB7_unet_builder(input_shape)
-print(model.summary())
+model.summary()
 
 model.fit(x=x_train, y=y_train, batch_size=16, epochs=500, verbose=2, callbacks=[early_stop, checkpoint, reduce_lr, lr_shceduler])

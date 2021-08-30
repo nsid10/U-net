@@ -7,8 +7,8 @@ def Conv_block(x, filters: int, a=0.01, dr=0.05, k=3, s=1):
     conv > batch_norm > leakyReLU > dropout
 
     Args:
-        x: Input tensor
-        filters (int): No. of filters in convolution layer
+        x: Input tensor.
+        filters (int): No. of filters in convolution layer.
         a (float, optional): Leakage rate for ReLU. Defaults to 0.01.
         dr (float, optional): Dropout rate. Defaults to 0.05.
         k (int, optional): Kernel size. Defaults to 3.
@@ -25,36 +25,84 @@ def Conv_block(x, filters: int, a=0.01, dr=0.05, k=3, s=1):
     return x
 
 
-def Residual_block(x, filters: int, a=0.01, dr=0.05):
+def Residual_block(x, filters: int, a=0.01, dr=0.05, depth=2):
     """
-    ResNet block with skip connection
+    Residual block with skip connection
 
     Args:
-        x: Input tensor
-        filters (int): No. of filters in convolution layer
+        x: Input tensor.
+        filters (int): No. of filters in convolution layer.
         a (float, optional): Leakage rate for ReLU. Defaults to 0.01.
         dr (float, optional): Dropout rate. Defaults to 0.05.
+        depth (int, optional): Depth of skip connection. Defaults to 2.
 
     Returns:
         Output tensor
     """
     y = Conv_block(x, filters, a, dr)
-    y = Conv_block(y, filters, a, dr)
-    y = Add(axis=-1)([x, y])
+    for _ in range(depth - 1):
+        y = Conv_block(y, filters, a, dr)
+    y = Add()([x, y])
 
     return y
 
 
-def Dense_block(x, filters: int, a=0.01, dr=0.05, depth=2):
+def Recurrent_block(x, filters: int, a=0.01, dr=0.05, depth=3):
+    """
+    Recurrent block with feedback connection
+
+    Args:
+        x: Input tensor.
+        filters (int): No. of filters in convolution layer.
+        a (float, optional): Leakage rate for ReLU. Defaults to 0.01.
+        dr (float, optional): Dropout rate. Defaults to 0.05.
+        depth (int, optional): Number of recurrent feedbacks. Defaults to 3.
+
+    Returns:
+        Output tensor
+    """
+    y = Conv_block(x, filters, a, dr)
+    y = Add()([x, y])
+    for _ in range(depth - 1):
+        y = Conv_block(y, filters, a, dr)
+        y = Add()([x, y])
+
+    return y
+
+
+def R2_block(x, filters: int, a=0.01, dr=0.05, rec_depth=3, res_depth=2):
+    """
+    Recurrent residual block
+
+    Args:
+        x: Input tensor.
+        filters (int): No. of filters in convolution layer.
+        a (float, optional): Leakage rate for ReLU. Defaults to 0.01.
+        dr (float, optional): Dropout rate. Defaults to 0.05.
+        rec_depth (int, optional): Number of recurrent feedbacks. Defaults to 3.
+        res_depth (int, optional): Depth of skip connection. Defaults to 2.
+
+    Returns:
+        Output tensor
+    """
+    y = Recurrent_block(x, filters, a, dr, rec_depth)
+    for _ in range(res_depth - 1):
+        y = Recurrent_block(y, filters, a, dr, rec_depth)
+    y = Concatenate(axis=-1)([x, y])
+
+    return y
+
+
+def Dense_block(x, filters: int, a=0.01, dr=0.05, depth=4):
     """
     DenseNet block with skip connections
 
     Args:
-        x: Input tensor
-        filters (int): No. of filters in convolution layer
+        x: Input tensor.
+        filters (int): No. of filters in convolution layer.
         a (float, optional): Leakage rate for ReLU. Defaults to 0.01.
         dr (float, optional): Dropout rate. Defaults to 0.05.
-        depth (int, optional):  Defaults to 2.
+        depth (int, optional): Number of layers. Defaults to 4.
 
     Returns:
         Output tensor
@@ -71,8 +119,8 @@ def Fractal(x, filters: int, order: int, a=0.01, dr=0.05, join=True):
     Generates a fractal connection block
 
     Args:
-        x: Input tensor
-        filters (int): No. of filters in convolution layer
+        x: Input tensor.
+        filters (int): No. of filters in convolution layer.
         order (int): No. of fractal expansions.
         a (float, optional): Leakage rate for ReLU. Defaults to 0.01.
         dr (float, optional): Dropout rate. Defaults to 0.05.
