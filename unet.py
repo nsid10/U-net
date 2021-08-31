@@ -6,49 +6,62 @@ from tensorflow.keras.optimizers import Adam
 from blocks import Conv_block
 
 
-def unet_block(x, filters: int):
+def unet_block(x, filters: int, a=0.01, dr=0.05):
     """
     U-net functional block
 
     Edit this block as needed
-    """
-    a = 0.05  # Leakage rate for ReLU.
-    dr = 0.1  # Dropout rate.
 
+    Args:
+        x: Input tensor.
+        filters (int): No. of filters in convolution layer.
+        a (float, optional): Leakage rate for ReLU. Defaults to 0.01.
+        dr (float, optional): Dropout rate. Defaults to 0.05.
+
+    Returns:
+        Output tensor
+    """
     y = Conv_block(x, filters, a, dr)
+    # y = Residual_block(x, filters, a, dr, depth=2)
+    # y = Recurrent_block(x, filters, a, dr, depth=2)
+    # y = R2_block(x, filters, a, dr, depth=2)
+    # y = Dense_block(x, filters, a, dr, depth=2)
+    # y = Fractal(x, filters, 4, a, dr, depth=2)
 
     return y
 
 
-def unet_builder(input_shape: tuple):
+def unet_builder(input_shape: tuple, filters=[32, 32, 48, 80, 224], a=0.01, dr=0.05):
     """
     Generalized U-net builder
 
     Args:
-        input_shape (tuple): Input shape of data
+        input_shape (tuple): Input shape of data.
+        filters (list, optional): Filter size per U-net level. Defaults to [32, 32, 48, 80, 224].
+        a (float, optional): Leakage rate for ReLU. Defaults to 0.01.
+        dr (float, optional): Dropout rate. Defaults to 0.05.
 
     Returns:
         Keras model
     """
-    filters = [32, 32, 48, 80, 224]
     level = len(filters) - 1
     contract = list()
 
     # input
     start = Input(input_shape)
-    xx = unet_block(start, filters[0])
+    xx = unet_block(start, filters[0], a, dr)
 
     # contracting path
     for ii in range(level):
         contract.append(xx)
         en = MaxPool2D()(xx)
-        xx = unet_block(en, filters[ii + 1])
+        xx = unet_block(en, filters[ii + 1], a, dr)
 
     # expansive path
     for jj in range(level):
         ex = Conv2DTranspose(filters[level - jj], (2, 2), strides=(2, 2), padding="same")(xx)
         ex = Concatenate(axis=-1)([ex, contract[-jj - 1]])
-        xx = unet_block(ex, filters[-jj - 2])
+        xx = unet_block(ex, filters[-jj - 2], a, dr)
 
     # output
     end = Conv2D(1, (1, 1), activation="sigmoid")(xx)
@@ -60,17 +73,19 @@ def unet_builder(input_shape: tuple):
     return model
 
 
-def efficientB7_unet_builder(input_shape: tuple):
+def efficientB7_unet_builder(input_shape: tuple, filters=[32, 32, 48, 80, 224], a=0.01, dr=0.05):
     """
-    EfficientNetB7 U-net builder
+    EfficientB7 U-net builder
 
     Args:
-        input_shape (tuple): Input shape of data
+        input_shape (tuple): Input shape of data.
+        filters (list, optional): Filter size per U-net level. Defaults to [32, 32, 48, 80, 224].
+        a (float, optional): Leakage rate for ReLU. Defaults to 0.01.
+        dr (float, optional): Dropout rate. Defaults to 0.05.
 
     Returns:
-        Keras model
+        [type]: [description]
     """
-    filters = [32, 32, 48, 80, 224]
     level = len(filters) - 1
     contract = list()
 
@@ -78,7 +93,7 @@ def efficientB7_unet_builder(input_shape: tuple):
 
     # input
     start = Encoder.input
-    xx = unet_block(start, filters[0])
+    xx = unet_block(start, filters[0], a, dr)
 
     # contracting path
     for ii in (52, 156, 260, 557):
@@ -89,7 +104,7 @@ def efficientB7_unet_builder(input_shape: tuple):
     for jj in range(level):
         ex = Conv2DTranspose(filters[level - jj], (2, 2), strides=(2, 2), padding="same")(xx)
         ex = Concatenate(axis=-1)([ex, contract[-jj - 1]])
-        xx = unet_block(ex, filters[-jj - 2])
+        xx = unet_block(ex, filters[-jj - 2], a, dr)
 
     # output
     end = Conv2D(1, (1, 1), activation="sigmoid")(xx)
