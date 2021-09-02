@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.callbacks import EarlyStopping, LearningRateScheduler, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.callbacks import EarlyStopping, LearningRateScheduler, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 
 from unet import efficientB7_unet_builder
 
@@ -36,22 +36,23 @@ input_shape = (h, w, c)
 
 
 # callbacks
-early_stop = EarlyStopping(monitor="loss", patience=10)
-checkpoint = ModelCheckpoint(filepath=f"{main_path}/checkpoint/", monitor="loss", save_best_only=True, save_freq="epoch")
-reduce_lr = ReduceLROnPlateau(monitor="loss", factor=0.3, patience=5, verbose=1, cooldown=10, min_lr=1e-6)
+early_stop = EarlyStopping(monitor="val_loss", patience=10)
+checkpoint = ModelCheckpoint(filepath=f"{main_path}/checkpoint", monitor="val_loss", save_best_only=True, save_freq="epoch")
+reduce_lr = ReduceLROnPlateau(monitor="val_loss", factor=0.3, patience=5, verbose=1, cooldown=5, min_lr=1e-5)
+lr_shceduler = LearningRateScheduler(lambda _, lr: lr * np.exp(-0.01), verbose=1)
+tensorboard = TensorBoard(f"{main_path}/logs", update_freq=1)
 
-
-def scheduler(epoch, lr):
-    if epoch < 1:
-        return lr
-    else:
-        return lr * tf.math.exp(-0.01)
-
-
-lr_shceduler = LearningRateScheduler(scheduler, verbose=1)
 
 # training model
 model = efficientB7_unet_builder(input_shape)
 model.summary()
 
-model.fit(x=x_train, y=y_train, batch_size=16, epochs=500, verbose=2, callbacks=[early_stop, checkpoint, reduce_lr, lr_shceduler])
+model.fit(
+    x=x_train,
+    y=y_train,
+    batch_size=16,
+    epochs=250,
+    verbose=2,
+    callbacks=[early_stop, checkpoint, reduce_lr, lr_shceduler, tensorboard],
+    validation_split=0.1,
+)

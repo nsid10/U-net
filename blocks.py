@@ -114,7 +114,7 @@ def Dense_block(x, filters: int, a=0.01, dr=0.05, depth=4):
     return x
 
 
-def Fractal(x, filters: int, order: int, a=0.01, dr=0.05, join=True):
+def Fractal_block(x, filters: int, order: int, a=0.01, dr=0.05, join=True):
     """
     Generates a fractal connection block
 
@@ -144,8 +144,8 @@ def Fractal(x, filters: int, order: int, a=0.01, dr=0.05, join=True):
 
     right = Conv_block(x, filters, a, dr)
     if order > 2:
-        left_a = Fractal(x, filters, order - 1, a, dr, True)
-        left_b = Fractal(left_a, filters, order - 1, a, dr, False)
+        left_a = Fractal_block(x, filters, order - 1, a, dr, True)
+        left_b = Fractal_block(left_a, filters, order - 1, a, dr, False)
     else:
         left_a = Conv_block(x, filters, a, dr)
         left_b = Conv_block(left_a, filters, a, dr)

@@ -22,11 +22,6 @@ def unet_block(x, filters: int, a=0.01, dr=0.05):
         Output tensor
     """
     y = Conv_block(x, filters, a, dr)
-    # y = Residual_block(x, filters, a, dr, depth=2)
-    # y = Recurrent_block(x, filters, a, dr, depth=2)
-    # y = R2_block(x, filters, a, dr, depth=2)
-    # y = Dense_block(x, filters, a, dr, depth=2)
-    # y = Fractal(x, filters, 4, a, dr, depth=2)
 
     return y
 
@@ -67,9 +62,7 @@ def unet_builder(input_shape: tuple, filters=[32, 32, 48, 80, 224], a=0.01, dr=0
     end = Conv2D(1, (1, 1), activation="sigmoid")(xx)
 
     model = tf.keras.Model(inputs=[start], outputs=[end])
-
-    model.compile(optimizer=Adam(0.01), loss="binary_crossentropy", metrics=["acc", "mse"])
-
+    model.compile(optimizer=Adam(0.1), loss="binary_crossentropy", metrics=["acc", "mse"])
     return model
 
 
@@ -110,7 +103,5 @@ def efficientB7_unet_builder(input_shape: tuple, filters=[32, 32, 48, 80, 224], 
     end = Conv2D(1, (1, 1), activation="sigmoid")(xx)
 
     model = tf.keras.Model(inputs=[start], outputs=[end])
-
-    model.compile(optimizer=Adam(0.01), loss="binary_crossentropy", metrics=["acc", "mse"])
-
+    model.compile(optimizer=Adam(0.1), loss="binary_crossentropy", metrics=["acc", "mse"])
     return model

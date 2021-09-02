@@ -15,7 +15,7 @@ x_test = np.concatenate([np.load(testing_images + file_id)["arr_0"] for file_id 
 x_test = x_test / 255
 
 # testing model
-model = tf.keras.models.load_model(f"{main_path}/checkpoint/")
+model = tf.keras.models.load_model(f"{main_path}/checkpoint")
 preds = model.predict(x_test)
 
 # saving predictions
