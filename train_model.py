@@ -36,7 +36,7 @@ input_shape = (h, w, c)
 
 
 # callbacks
-early_stop = EarlyStopping(monitor="val_loss", patience=10)
+early_stop = EarlyStopping(monitor="val_loss", patience=15)
 checkpoint = ModelCheckpoint(filepath=f"{main_path}/checkpoint", monitor="val_loss", save_best_only=True, save_freq="epoch")
 reduce_lr = ReduceLROnPlateau(monitor="val_loss", factor=0.3, patience=5, verbose=1, cooldown=5, min_lr=1e-5)
 lr_shceduler = LearningRateScheduler(lambda _, lr: lr * np.exp(-0.01), verbose=1)
