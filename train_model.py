@@ -36,7 +36,7 @@ input_shape = (h, w, c)
 
 
 # callbacks
-early_stop = EarlyStopping(monitor="val_loss", patience=15)
+early_stop = EarlyStopping(monitor="val_loss", patience=25)
 checkpoint = ModelCheckpoint(filepath=f"{main_path}/checkpoint", monitor="val_loss", save_best_only=True, save_freq="epoch")
 reduce_lr = ReduceLROnPlateau(monitor="val_loss", factor=0.3, patience=5, verbose=1, cooldown=5, min_lr=1e-5)
 lr_shceduler = LearningRateScheduler(lambda _, lr: lr * np.exp(-0.01), verbose=1)
@@ -54,5 +54,5 @@ model.fit(
     epochs=250,
     verbose=2,
     callbacks=[early_stop, checkpoint, reduce_lr, lr_shceduler, tensorboard],
-    validation_split=0.1,
+    validation_split=0.2,
 )

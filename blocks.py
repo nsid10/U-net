@@ -1,7 +1,7 @@
 from tensorflow.keras.layers import Add, BatchNormalization, Concatenate, Conv2D, Dropout, LeakyReLU
 
 
-def Conv_block(x, filters: int, a=0.01, dr=0.05, k=3, s=1):
+def conv_block(x, filters: int, a=0.01, dr=0.05, k=3, s=1):
     """
     Custom convolution block
     conv > batch_norm > leakyReLU > dropout
@@ -25,7 +25,7 @@ def Conv_block(x, filters: int, a=0.01, dr=0.05, k=3, s=1):
     return x
 
 
-def Residual_block(x, filters: int, a=0.01, dr=0.05, depth=2):
+def residual_block(x, filters: int, a=0.01, dr=0.05, depth=2):
     """
     Residual block with skip connection
 
@@ -39,15 +39,15 @@ def Residual_block(x, filters: int, a=0.01, dr=0.05, depth=2):
     Returns:
         Output tensor
     """
-    y = Conv_block(x, filters, a, dr)
+    y = conv_block(x, filters, a, dr)
     for _ in range(depth - 1):
-        y = Conv_block(y, filters, a, dr)
+        y = conv_block(y, filters, a, dr)
     y = Add()([x, y])
 
     return y
 
 
-def Recurrent_block(x, filters: int, a=0.01, dr=0.05, depth=3):
+def recurrent_block(x, filters: int, a=0.01, dr=0.05, depth=3):
     """
     Recurrent block with feedback connection
 
@@ -61,16 +61,16 @@ def Recurrent_block(x, filters: int, a=0.01, dr=0.05, depth=3):
     Returns:
         Output tensor
     """
-    y = Conv_block(x, filters, a, dr)
+    y = conv_block(x, filters, a, dr)
     y = Add()([x, y])
     for _ in range(depth - 1):
-        y = Conv_block(y, filters, a, dr)
+        y = conv_block(y, filters, a, dr)
         y = Add()([x, y])
 
     return y
 
 
-def R2_block(x, filters: int, a=0.01, dr=0.05, rec_depth=3, res_depth=2):
+def r2_block(x, filters: int, a=0.01, dr=0.05, rec_depth=3, res_depth=2):
     """
     Recurrent residual block
 
@@ -85,15 +85,15 @@ def R2_block(x, filters: int, a=0.01, dr=0.05, rec_depth=3, res_depth=2):
     Returns:
         Output tensor
     """
-    y = Recurrent_block(x, filters, a, dr, rec_depth)
+    y = recurrent_block(x, filters, a, dr, rec_depth)
     for _ in range(res_depth - 1):
-        y = Recurrent_block(y, filters, a, dr, rec_depth)
+        y = recurrent_block(y, filters, a, dr, rec_depth)
     y = Concatenate(axis=-1)([x, y])
 
     return y
 
 
-def Dense_block(x, filters: int, a=0.01, dr=0.05, depth=4):
+def dense_block(x, filters: int, a=0.01, dr=0.05, depth=4):
     """
     DenseNet block with skip connections
 
@@ -108,13 +108,13 @@ def Dense_block(x, filters: int, a=0.01, dr=0.05, depth=4):
         Output tensor
     """
     for _ in range(depth):
-        xn = Conv_block(x, filters, a, dr)
+        xn = conv_block(x, filters, a, dr)
         x = Concatenate(axis=-1)([x, xn])
 
     return x
 
 
-def Fractal_block(x, filters: int, order: int, a=0.01, dr=0.05, join=True):
+def fractal_block(x, filters: int, order: int, a=0.01, dr=0.05, join=True):
     """
     Generates a fractal connection block
 
@@ -142,13 +142,13 @@ def Fractal_block(x, filters: int, order: int, a=0.01, dr=0.05, join=True):
             result = [box[0]] + flatten(box[1:])
         return result
 
-    right = Conv_block(x, filters, a, dr)
+    right = conv_block(x, filters, a, dr)
     if order > 2:
-        left_a = Fractal_block(x, filters, order - 1, a, dr, True)
-        left_b = Fractal_block(left_a, filters, order - 1, a, dr, False)
+        left_a = fractal_block(x, filters, order - 1, a, dr, True)
+        left_b = fractal_block(left_a, filters, order - 1, a, dr, False)
     else:
-        left_a = Conv_block(x, filters, a, dr)
-        left_b = Conv_block(left_a, filters, a, dr)
+        left_a = conv_block(x, filters, a, dr)
+        left_b = conv_block(left_a, filters, a, dr)
 
     if join:
         return Concatenate(axis=-1)(flatten([left_b, right]))
